@@ -12,6 +12,7 @@ module Prmd
     def initialize(new_data = {})
       @data = convert_type_to_array(new_data)
       @schemata_examples = {}
+      @prev_ref_key = nil
     end
 
     #
@@ -64,6 +65,12 @@ module Prmd
         if reference.key?('$ref')
           value = reference.dup
           key = value.delete('$ref')
+          prev_ref_key = @prev_ref_key
+          @prev_ref_key = nil
+          if key == prev_ref_key
+            return [nil, {'type' => ['object', nil], 'properties' => {}}]
+          end
+          @prev_ref_key = key
         else
           return [nil, reference] # no dereference needed
         end
